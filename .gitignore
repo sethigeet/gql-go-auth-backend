@@ -9,3 +9,4 @@ bin/*
 
 # Env vars
 .env.*
+!.env.example

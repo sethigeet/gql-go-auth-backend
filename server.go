@@ -18,9 +18,10 @@ import (
 const PORT = "8080"
 
 func main() {
-	err := util.LoadEnv()
+	err := util.LoadEnv(true)
 	if err != nil {
-		log.Fatalf("Unable to load the env file: \n%s", err)
+		log.Fatalf("Errors while loading the env file: \n%s", err)
+		return
 	}
 
 	port := os.Getenv("PORT")
