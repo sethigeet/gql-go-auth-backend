@@ -15,7 +15,7 @@ import (
 
 // PORT The default port on which the server should
 // run on if the no port is specified in the environment
-const PORT = "8080"
+const PORT = "4000"
 
 func main() {
 	err := util.LoadEnv(true)
@@ -24,15 +24,15 @@ func main() {
 		return
 	}
 
+	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{}}))
+
+	http.Handle("/api", playground.Handler("GraphQL playground", "/api/query"))
+	http.Handle("/api/query", server)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = PORT
 	}
-
-	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{}}))
-
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", server)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
