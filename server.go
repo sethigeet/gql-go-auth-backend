@@ -10,14 +10,22 @@ import (
 
 	"github.com/sethigeet/gql-go-auth-backend/graph/generated"
 	"github.com/sethigeet/gql-go-auth-backend/graph/resolver"
+	"github.com/sethigeet/gql-go-auth-backend/util"
 )
 
-const defaultPort = "8080"
+// PORT The default port on which the server should
+// run on if the no port is specified in the environment
+const PORT = "8080"
 
 func main() {
+	err := util.LoadEnv()
+	if err != nil {
+		log.Fatalf("Unable to load the env file: \n%s", err)
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = defaultPort
+		port = PORT
 	}
 
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{}}))
