@@ -9,5 +9,5 @@ import (
 )
 
 type Resolver struct {
-	db *gorm.DB
+	DB *gorm.DB
 }

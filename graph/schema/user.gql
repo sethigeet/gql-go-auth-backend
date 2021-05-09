@@ -6,7 +6,7 @@ type User {
   email: String!
   username: String!
   createdAt: Int!
-  updatedAt: Int
+  updatedAt: Int!
 }
 
 type UserResponse {

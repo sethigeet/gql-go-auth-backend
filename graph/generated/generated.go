@@ -96,7 +96,7 @@ type QueryResolver interface {
 }
 type UserResolver interface {
 	CreatedAt(ctx context.Context, obj *model.User) (int, error)
-	UpdatedAt(ctx context.Context, obj *model.User) (*int, error)
+	UpdatedAt(ctx context.Context, obj *model.User) (int, error)
 }
 
 type executableSchema struct {
@@ -350,7 +350,7 @@ type User {
   email: String!
   username: String!
   createdAt: Int!
-  updatedAt: Int
+  updatedAt: Int!
 }
 
 type UserResponse {
@@ -1220,11 +1220,14 @@ func (ec *executionContext) _User_updatedAt(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UserResponse_errors(ctx context.Context, field graphql.CollectedField, obj *model.UserResponse) (ret graphql.Marshaler) {
@@ -2707,6 +2710,9 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._User_updatedAt(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		default:
@@ -3385,21 +3391,6 @@ func (ec *executionContext) marshalOFieldError2ᚕᚖgithubᚗcomᚋsethigeetᚋ
 	}
 	wg.Wait()
 	return ret
-}
-
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalInt(*v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

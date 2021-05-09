@@ -11,11 +11,19 @@ import (
 	"github.com/sethigeet/gql-go-auth-backend/graph/model"
 )
 
+func (r *mutationResolver) Register(ctx context.Context, credentials model.RegisterInput) (*model.UserResponse, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*model.UserResponse, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) Login(ctx context.Context, credentials model.LoginInput) (*model.UserResponse, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -27,10 +35,6 @@ func (r *mutationResolver) LogoutAllSessions(ctx context.Context) (bool, error) 
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) Register(ctx context.Context, credentials model.RegisterInput) (*model.UserResponse, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *mutationResolver) ForgotPassword(ctx context.Context, credentials model.ForgotPasswordInput) (*model.ResetPasswordResponse, error) {
 	panic(fmt.Errorf("not implemented"))
 }
@@ -39,16 +43,12 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, credentials model
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *userResolver) CreatedAt(ctx context.Context, obj *model.User) (int, error) {
-	panic(fmt.Errorf("not implemented"))
+	return int(obj.CreatedAt.Unix()), nil
 }
 
-func (r *userResolver) UpdatedAt(ctx context.Context, obj *model.User) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *userResolver) UpdatedAt(ctx context.Context, obj *model.User) (int, error) {
+	return int(obj.UpdatedAt.Unix()), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

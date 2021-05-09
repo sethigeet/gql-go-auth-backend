@@ -8,6 +8,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 
+	"github.com/sethigeet/gql-go-auth-backend/database"
 	"github.com/sethigeet/gql-go-auth-backend/graph/generated"
 	"github.com/sethigeet/gql-go-auth-backend/graph/resolver"
 	"github.com/sethigeet/gql-go-auth-backend/util"
@@ -18,13 +19,21 @@ import (
 const PORT = "4000"
 
 func main() {
-	err := util.LoadEnv(true)
+	var err error
+	err = util.LoadEnv(true)
 	if err != nil {
 		log.Fatalf("Errors while loading the env file: \n%s", err)
 		return
 	}
 
-	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{}}))
+	db, err := database.Connect()
+	if err != nil {
+		log.Fatalf("Errors while connecting to the database: \n%s", err)
+		return
+	}
+
+	resolvers := resolver.Resolver{DB: db}
+	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers}))
 
 	http.Handle("/api", playground.Handler("GraphQL playground", "/api/query"))
 	http.Handle("/api/query", server)
