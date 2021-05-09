@@ -3,11 +3,15 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"time"
 
-	"github.com/sethigeet/gql-go-auth-backend/graph/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+
+	"github.com/sethigeet/gql-go-auth-backend/graph/model"
 )
 
 // Connect connects to the database and returns the db object
@@ -21,7 +25,20 @@ func Connect(migrate bool) (*gorm.DB, error) {
 	)
 
 	// Connect to the database
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	var logLevel int
+	env := os.Getenv("GO_ENV")
+	if env == "testing" || env == "production" {
+		logLevel = int(logger.Error)
+	} else {
+		logLevel = int(logger.Info)
+	}
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{
+			SlowThreshold: 200 * time.Millisecond,
+			LogLevel:      logger.LogLevel(logLevel),
+			Colorful:      true,
+		}),
+	})
 	if err != nil {
 		return nil, err
 	}
