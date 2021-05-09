@@ -4,9 +4,10 @@
 package resolver
 
 //go:generate go run github.com/99designs/gqlgen
-import "github.com/sethigeet/gql-go-auth-backend/graph/model"
+import (
+	"gorm.io/gorm"
+)
 
 type Resolver struct {
-	todos []*model.Todo
-	users []*model.User
+	db *gorm.DB
 }

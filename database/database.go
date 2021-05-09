@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sethigeet/gql-go-auth-backend/graph/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -18,5 +19,22 @@ func Connect() (*gorm.DB, error) {
 		os.Getenv("DB_DBNAME"),
 		os.Getenv("DB_PORT"),
 	)
-	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	// Connect to the database
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := automigrate(db); err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func automigrate(db *gorm.DB) error {
+	err := db.AutoMigrate(&model.User{})
+
+	return err
 }

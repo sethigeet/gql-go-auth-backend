@@ -1,0 +1,60 @@
+#######
+# Types
+#######
+type User {
+  id: String!
+  email: String!
+  username: String!
+  createdAt: Int!
+  updatedAt: Int
+}
+
+type UserResponse {
+  errors: [FieldError!]
+  user: User
+}
+
+type ResetPasswordResponse {
+  errors: [FieldError!]
+  successful: Boolean
+}
+
+########
+# Inputs
+########
+input RegisterInput {
+  email: String!
+  username: String!
+  password: String!
+}
+
+input LoginInput {
+  usernameOrEmail: String!
+  password: String!
+}
+
+input ForgotPasswordInput {
+  usernameOrEmail: String!
+}
+
+input ChangePasswordInput {
+  token: String!
+  newPassword: String!
+}
+
+#####################
+# Add to global types
+#####################
+type Mutation {
+  confirmEmail(token: String!): UserResponse!
+  login(credentials: LoginInput!): UserResponse!
+  logout: Boolean!
+  logoutAllSessions: Boolean!
+  register(credentials: RegisterInput!): UserResponse!
+  forgotPassword(credentials: ForgotPasswordInput!): ResetPasswordResponse!
+  changePassword(credentials: ChangePasswordInput!): ResetPasswordResponse!
+}
+
+type Query {
+  me: User
+}

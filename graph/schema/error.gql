@@ -1,0 +1,5 @@
+type FieldError {
+  field: String!
+  message: String!
+}
+

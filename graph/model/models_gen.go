@@ -2,12 +2,37 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type ChangePasswordInput struct {
+	Token       string `json:"token"`
+	NewPassword string `json:"newPassword"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type FieldError struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+}
+
+type ForgotPasswordInput struct {
+	UsernameOrEmail string `json:"usernameOrEmail"`
+}
+
+type LoginInput struct {
+	UsernameOrEmail string `json:"usernameOrEmail"`
+	Password        string `json:"password"`
+}
+
+type RegisterInput struct {
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type ResetPasswordResponse struct {
+	Errors     []*FieldError `json:"errors"`
+	Successful *bool         `json:"successful"`
+}
+
+type UserResponse struct {
+	Errors []*FieldError `json:"errors"`
+	User   *User         `json:"user"`
 }
