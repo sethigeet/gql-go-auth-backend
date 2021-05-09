@@ -9,13 +9,13 @@ import (
 
 // User is the user model that is used for the graphql queries and database tables
 type User struct {
-	ID        string    `json:"id"`
-	Email     string    `json:"email" gorm:"unique"`
-	Username  string    `json:"username" gorm:"unique"`
-	Password  string    `json:"password"`
+	ID        string    `json:"id" gorm:"type:uuid;primaryKey"`
+	Email     string    `json:"email" gorm:"not null;unique;size:256"`
+	Username  string    `json:"username" gorm:"not null;unique;size:256"`
+	Password  string    `json:"password" gorm:"not null;size:256"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	Confirmed bool      `json:"confirmed"`
+	Confirmed bool      `json:"confirmed" gorm:"type:bool;not null;default:true"`
 }
 
 func (user *User) BeforeCreate(tx *gorm.DB) error {

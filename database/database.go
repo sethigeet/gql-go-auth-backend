@@ -11,7 +11,7 @@ import (
 )
 
 // Connect connects to the database and returns the db object
-func Connect() (*gorm.DB, error) {
+func Connect(migrate bool) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Kolkata",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
@@ -26,8 +26,10 @@ func Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err := automigrate(db); err != nil {
-		return nil, err
+	if migrate {
+		if err := automigrate(db); err != nil {
+			return nil, err
+		}
 	}
 
 	return db, nil

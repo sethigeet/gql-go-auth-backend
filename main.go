@@ -26,7 +26,7 @@ func main() {
 		return
 	}
 
-	db, err := database.Connect()
+	db, err := database.Connect(true)
 	if err != nil {
 		log.Fatalf("Errors while connecting to the database: \n%s", err)
 		return
