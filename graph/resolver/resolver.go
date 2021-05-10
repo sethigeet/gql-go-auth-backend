@@ -5,9 +5,11 @@ package resolver
 
 //go:generate go run github.com/99designs/gqlgen
 import (
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
 type Resolver struct {
-	DB *gorm.DB
+	DB  *gorm.DB
+	RDB *redis.Client
 }

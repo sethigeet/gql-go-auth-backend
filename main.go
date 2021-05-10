@@ -26,13 +26,13 @@ func main() {
 		return
 	}
 
-	db, err := database.Connect(true)
+	db, rdb, err := database.Connect(true)
 	if err != nil {
 		log.Fatalf("Errors while connecting to the database: \n%s", err)
 		return
 	}
 
-	resolvers := resolver.Resolver{DB: db}
+	resolvers := resolver.Resolver{DB: db, RDB: rdb}
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers}))
 
 	http.Handle("/api", playground.Handler("GraphQL playground", "/api/query"))
