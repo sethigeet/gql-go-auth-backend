@@ -7,6 +7,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-redis/redis/v8"
+	"gorm.io/gorm"
 
 	"github.com/sethigeet/gql-go-auth-backend/database"
 	"github.com/sethigeet/gql-go-auth-backend/graph/generated"
@@ -32,11 +34,9 @@ func main() {
 		return
 	}
 
-	resolvers := resolver.Resolver{DB: db, RDB: rdb}
-	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers}))
-
+	server := getServer(db, rdb)
 	http.Handle("/api", playground.Handler("GraphQL playground", "/api/query"))
-	http.Handle("/api/query", server)
+	http.HandleFunc("/api/query", server)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -45,4 +45,17 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func getServer(db *gorm.DB, rdb *redis.Client) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		resolvers := resolver.Resolver{
+			DB:      db,
+			RDB:     rdb,
+			Writer:  w,
+			Request: r,
+		}
+		server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers}))
+		server.ServeHTTP(w, r)
+	}
 }
