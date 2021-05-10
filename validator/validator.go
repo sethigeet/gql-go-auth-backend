@@ -9,12 +9,12 @@ import (
 	"github.com/sethigeet/gql-go-auth-backend/graph/model"
 )
 
-func Validate(toValidate interface{}) []model.FieldError {
+func Validate(toValidate interface{}) []*model.FieldError {
 	validate := validator.New()
 	err := validate.Struct(toValidate)
 
 	if err != nil {
-		errs := []model.FieldError{}
+		errs := []*model.FieldError{}
 		for _, err := range err.(validator.ValidationErrors) {
 			errs = append(errs, translate(err))
 		}
@@ -24,7 +24,7 @@ func Validate(toValidate interface{}) []model.FieldError {
 	return nil
 }
 
-func translate(err validator.FieldError) model.FieldError {
+func translate(err validator.FieldError) *model.FieldError {
 	field := err.Field()
 	errTag := err.Tag()
 
@@ -32,6 +32,10 @@ func translate(err validator.FieldError) model.FieldError {
 	switch errTag {
 	case "required":
 		message = getRequiredMessage(field)
+	case "email":
+		message = getEmailMessage(field)
+	case "excludesrune":
+		message = getExcludesMessage(field, err.Param())
 	case "lt":
 		message = getLessThanMessage(field, err.Param())
 	case "gt":
@@ -40,7 +44,7 @@ func translate(err validator.FieldError) model.FieldError {
 		panic("This type of validation error is not implemented yet!")
 	}
 
-	return model.FieldError{
+	return &model.FieldError{
 		Field:   strings.ToLower(string(field[0])) + string(field[1:]),
 		Message: message,
 	}

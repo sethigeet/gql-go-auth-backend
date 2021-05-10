@@ -1,21 +1,21 @@
 package model
 
 type RegisterInput struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Username string `json:"username" validate:"required,excludesrune=@"`
+	Password string `json:"password" validate:"required,gt=4"`
 }
 
 type LoginInput struct {
-	UsernameOrEmail string `json:"usernameOrEmail"`
-	Password        string `json:"password"`
+	UsernameOrEmail string `json:"usernameOrEmail" validate:"required"`
+	Password        string `json:"password" validate:"required"`
 }
 
 type ForgotPasswordInput struct {
-	UsernameOrEmail string `json:"usernameOrEmail"`
+	UsernameOrEmail string `json:"usernameOrEmail" validate:"required"`
 }
 
 type ChangePasswordInput struct {
-	Token       string `json:"token"`
-	NewPassword string `json:"newPassword"`
+	Token       string `json:"token" validate:"required,uuid4"`
+	NewPassword string `json:"newPassword" validate:"required,gt=4"`
 }
