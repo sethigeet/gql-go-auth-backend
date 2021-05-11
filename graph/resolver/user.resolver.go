@@ -23,10 +23,6 @@ func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) LogoutAllSessions(ctx context.Context) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *mutationResolver) Register(ctx context.Context, credentials model.RegisterInput) (*model.UserResponse, error) {
 	panic(fmt.Errorf("not implemented"))
 }

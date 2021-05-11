@@ -49,7 +49,6 @@ type Mutation {
   confirmEmail(token: String!): UserResponse!
   login(credentials: LoginInput!): UserResponse!
   logout: Boolean!
-  logoutAllSessions: Boolean!
   register(credentials: RegisterInput!): UserResponse!
   forgotPassword(credentials: ForgotPasswordInput!): ResetPasswordResponse!
   changePassword(credentials: ChangePasswordInput!): ResetPasswordResponse!
