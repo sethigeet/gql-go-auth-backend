@@ -18,12 +18,20 @@ type SessionManager struct {
 	Request *http.Request
 }
 
+// CookieName is the name of the cookie that is stored in the browser
 const CookieName = "qid"
+
+// ExpirationDuration is the duration after which the cookie expires in the browser
 const ExpirationDuration = 365 * 24 * time.Hour
+
+// SessionIDPrefix is the string that is prefixed before the actual sessionID while storing in redis
+// so that it will be easily identifiable and it will not collide with any other key
 const SessionIDPrefix = "sess:"
 
 var ctx = context.Background()
 
+// Create creates a session of the user and stores the session ID in a cookie in the user's
+// browser and in redis
 func (manager SessionManager) Create(userID string) error {
 	// Create a new session ID
 	sessionID := uuid.New().String()
@@ -49,6 +57,7 @@ func (manager SessionManager) Create(userID string) error {
 	return nil
 }
 
+// Retrieve takes a boolean argument and return the sessionID or userID accoring to it
 func (manager SessionManager) Retrieve(onlySessionID bool) (string, error) {
 	var err error
 	cookie, err := manager.Request.Cookie(CookieName)
@@ -65,7 +74,7 @@ func (manager SessionManager) Retrieve(onlySessionID bool) (string, error) {
 		return sessionID, nil
 	}
 
-	userID, err := manager.RDB.Get(ctx, sessionID).Result()
+	userID, err := manager.RDB.Get(ctx, SessionIDPrefix+sessionID).Result()
 	switch {
 	case err == redis.Nil:
 		// key does not exist
@@ -78,6 +87,8 @@ func (manager SessionManager) Retrieve(onlySessionID bool) (string, error) {
 	return userID, nil
 }
 
+// Delete deletes the session using the session ID from redis and also deletes
+// the cookie from the user's browser
 func (manager SessionManager) Delete(sessionID string) error {
 	cookie := http.Cookie{
 		Name:   CookieName,
@@ -86,7 +97,7 @@ func (manager SessionManager) Delete(sessionID string) error {
 
 	http.SetCookie(manager.Writer, &cookie)
 
-	err := manager.RDB.Del(ctx, sessionID).Err()
+	err := manager.RDB.Del(ctx, SessionIDPrefix+sessionID).Err()
 	if err != nil {
 		return err
 	}
