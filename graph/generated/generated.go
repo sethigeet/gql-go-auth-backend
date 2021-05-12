@@ -50,13 +50,12 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ChangePassword    func(childComplexity int, credentials model.ChangePasswordInput) int
-		ConfirmEmail      func(childComplexity int, token string) int
-		ForgotPassword    func(childComplexity int, credentials model.ForgotPasswordInput) int
-		Login             func(childComplexity int, credentials model.LoginInput) int
-		Logout            func(childComplexity int) int
-		LogoutAllSessions func(childComplexity int) int
-		Register          func(childComplexity int, credentials model.RegisterInput) int
+		ChangePassword func(childComplexity int, credentials model.ChangePasswordInput) int
+		ConfirmEmail   func(childComplexity int, token string) int
+		ForgotPassword func(childComplexity int, credentials model.ForgotPasswordInput) int
+		Login          func(childComplexity int, credentials model.LoginInput) int
+		Logout         func(childComplexity int) int
+		Register       func(childComplexity int, credentials model.RegisterInput) int
 	}
 
 	Query struct {
@@ -86,7 +85,6 @@ type MutationResolver interface {
 	ConfirmEmail(ctx context.Context, token string) (*model.UserResponse, error)
 	Login(ctx context.Context, credentials model.LoginInput) (*model.UserResponse, error)
 	Logout(ctx context.Context) (bool, error)
-	LogoutAllSessions(ctx context.Context) (bool, error)
 	Register(ctx context.Context, credentials model.RegisterInput) (*model.UserResponse, error)
 	ForgotPassword(ctx context.Context, credentials model.ForgotPasswordInput) (*model.ResetPasswordResponse, error)
 	ChangePassword(ctx context.Context, credentials model.ChangePasswordInput) (*model.ResetPasswordResponse, error)
@@ -182,13 +180,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Logout(childComplexity), true
-
-	case "Mutation.logoutAllSessions":
-		if e.complexity.Mutation.LogoutAllSessions == nil {
-			break
-		}
-
-		return e.complexity.Mutation.LogoutAllSessions(childComplexity), true
 
 	case "Mutation.register":
 		if e.complexity.Mutation.Register == nil {
@@ -393,7 +384,6 @@ type Mutation {
   confirmEmail(token: String!): UserResponse!
   login(credentials: LoginInput!): UserResponse!
   logout: Boolean!
-  logoutAllSessions: Boolean!
   register(credentials: RegisterInput!): UserResponse!
   forgotPassword(credentials: ForgotPasswordInput!): ResetPasswordResponse!
   changePassword(credentials: ChangePasswordInput!): ResetPasswordResponse!
@@ -711,41 +701,6 @@ func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().Logout(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_logoutAllSessions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().LogoutAllSessions(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2560,11 +2515,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "logout":
 			out.Values[i] = ec._Mutation_logout(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "logoutAllSessions":
-			out.Values[i] = ec._Mutation_logoutAllSessions(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

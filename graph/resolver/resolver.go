@@ -9,11 +9,14 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
+
+	"github.com/sethigeet/gql-go-auth-backend/session"
 )
 
 type Resolver struct {
-	DB      *gorm.DB
-	RDB     *redis.Client
-	Writer  http.ResponseWriter
-	Request *http.Request
+	DB             *gorm.DB
+	RDB            *redis.Client
+	Writer         http.ResponseWriter
+	Request        *http.Request
+	SessionManager session.SessionManager
 }

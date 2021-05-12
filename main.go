@@ -13,6 +13,7 @@ import (
 	"github.com/sethigeet/gql-go-auth-backend/database"
 	"github.com/sethigeet/gql-go-auth-backend/graph/generated"
 	"github.com/sethigeet/gql-go-auth-backend/graph/resolver"
+	"github.com/sethigeet/gql-go-auth-backend/session"
 	"github.com/sethigeet/gql-go-auth-backend/util"
 )
 
@@ -54,6 +55,11 @@ func getServer(db *gorm.DB, rdb *redis.Client) func(w http.ResponseWriter, r *ht
 			RDB:     rdb,
 			Writer:  w,
 			Request: r,
+			SessionManager: session.SessionManager{
+				RDB:     rdb,
+				Writer:  w,
+				Request: r,
+			},
 		}
 		server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers}))
 		server.ServeHTTP(w, r)
