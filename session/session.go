@@ -92,7 +92,8 @@ func (manager SessionManager) Retrieve(onlySessionID bool) (string, error) {
 func (manager SessionManager) Delete(sessionID string) error {
 	cookie := http.Cookie{
 		Name:   CookieName,
-		MaxAge: -1, // -1 deletes the cookie
+		MaxAge: -1,
+		Path:   "/",
 	}
 
 	http.SetCookie(manager.Writer, &cookie)

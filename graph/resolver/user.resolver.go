@@ -74,7 +74,18 @@ func (r *mutationResolver) Login(ctx context.Context, credentials model.LoginInp
 }
 
 func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	var err error
+	sessionID, err := r.SessionManager.Retrieve(true)
+	if err != nil {
+		return false, err
+	}
+
+	err = r.SessionManager.Delete(sessionID)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (r *mutationResolver) Register(ctx context.Context, credentials model.RegisterInput) (*model.UserResponse, error) {
