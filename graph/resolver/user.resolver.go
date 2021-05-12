@@ -6,9 +6,11 @@ package resolver
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/sethigeet/gql-go-auth-backend/graph/generated"
 	"github.com/sethigeet/gql-go-auth-backend/graph/model"
+	"github.com/sethigeet/gql-go-auth-backend/validator"
 )
 
 func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*model.UserResponse, error) {
@@ -24,7 +26,50 @@ func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
 }
 
 func (r *mutationResolver) Register(ctx context.Context, credentials model.RegisterInput) (*model.UserResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	if validationErrors := validator.Validate(credentials); validationErrors != nil {
+		return &model.UserResponse{
+			User:   nil,
+			Errors: validationErrors,
+		}, nil
+	}
+
+	user := model.User{
+		Email:    credentials.Email,
+		Username: credentials.Username,
+		Password: credentials.Password,
+	}
+	result := r.DB.Create(&user)
+	if result.Error != nil {
+		if strings.Contains(result.Error.Error(), "duplicate key value violates unique constraint \"users_email_key\"") {
+			return &model.UserResponse{
+				Errors: []*model.FieldError{
+					{
+						Field:   "email",
+						Message: validator.GetAlreadyExistsMessage("email"),
+					},
+				},
+				User: nil,
+			}, nil
+		}
+
+		if strings.Contains(result.Error.Error(), "duplicate key value violates unique constraint \"users_username_key\"") {
+			return &model.UserResponse{
+				Errors: []*model.FieldError{
+					{
+						Field:   "username",
+						Message: validator.GetAlreadyExistsMessage("username"),
+					},
+				},
+				User: nil,
+			}, nil
+		}
+		return nil, result.Error
+	}
+
+	return &model.UserResponse{
+		Errors: nil,
+		User:   &user,
+	}, nil
 }
 
 func (r *mutationResolver) ForgotPassword(ctx context.Context, credentials model.ForgotPasswordInput) (*model.ResetPasswordResponse, error) {

@@ -21,3 +21,9 @@ func getLessThanMessage(field string, lessThan string) string {
 func getGreaterThanMessage(field string, greaterThan string) string {
 	return fmt.Sprintf("The length of %s must be greater than %s!", field, greaterThan)
 }
+
+// GetAlreadyExistsMessage returns a string that can be returned back to the user
+// as a feedback message to tell them that an entry with that value already exists
+func GetAlreadyExistsMessage(field string) string {
+	return fmt.Sprintf("An entry with that %s already exists!", field)
+}

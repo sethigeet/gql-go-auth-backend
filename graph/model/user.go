@@ -17,18 +17,18 @@ type User struct {
 	Password  string    `json:"password" gorm:"not null;size:256"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	Confirmed bool      `json:"confirmed" gorm:"type:bool;not null;default:true"`
+	Confirmed bool      `json:"confirmed" gorm:"type:bool;not null;default:false"`
 }
 
 func (user *User) BeforeCreate(tx *gorm.DB) error {
 	user.ID = uuid.New().String()
 
-	hashedPwd, err := util.HashPassword(user.Password)
+	hashedPasswd, err := util.HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
 
-	user.Password = hashedPwd
+	user.Password = hashedPasswd
 
 	return nil
 }
