@@ -12,6 +12,7 @@ require (
 	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0 // indirect
+	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf // indirect
 	gorm.io/driver/postgres v1.1.0 // indirect
 	gorm.io/gorm v1.21.9 // indirect
 )

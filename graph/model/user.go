@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+
+	"github.com/sethigeet/gql-go-auth-backend/util"
 )
 
 // User is the user model that is used for the graphql queries and database tables
@@ -20,6 +22,13 @@ type User struct {
 
 func (user *User) BeforeCreate(tx *gorm.DB) error {
 	user.ID = uuid.New().String()
+
+	hashedPwd, err := util.HashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+
+	user.Password = hashedPwd
 
 	return nil
 }
