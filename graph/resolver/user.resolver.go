@@ -5,11 +5,15 @@ package resolver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
+	"gorm.io/gorm"
+
 	"github.com/sethigeet/gql-go-auth-backend/graph/generated"
 	"github.com/sethigeet/gql-go-auth-backend/graph/model"
+	"github.com/sethigeet/gql-go-auth-backend/util"
 	"github.com/sethigeet/gql-go-auth-backend/validator"
 )
 
@@ -18,7 +22,55 @@ func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*mod
 }
 
 func (r *mutationResolver) Login(ctx context.Context, credentials model.LoginInput) (*model.UserResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	if validationErrors := validator.Validate(credentials); validationErrors != nil {
+		return &model.UserResponse{
+			User:   nil,
+			Errors: validationErrors,
+		}, nil
+	}
+
+	var user model.User
+	var result *gorm.DB
+	if strings.ContainsRune(credentials.UsernameOrEmail, '@') {
+		result = r.DB.First(&user, "email = ?", credentials.UsernameOrEmail)
+	} else {
+		result = r.DB.First(&user, "username = ?", credentials.UsernameOrEmail)
+	}
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return &model.UserResponse{
+			Errors: []*model.FieldError{
+				{
+					Field:   "usernameOrEmail",
+					Message: validator.GetDoesNotExistMessage("username/email"),
+				},
+			},
+			User: nil,
+		}, nil
+	}
+
+	verified := util.ComparePasswords(user.Password, credentials.Password)
+	if !verified {
+		return &model.UserResponse{
+			Errors: []*model.FieldError{
+				{
+					Field:   "password",
+					Message: validator.GetIncorrectMessage("password"),
+				},
+			},
+			User: nil,
+		}, nil
+	}
+
+	err := r.SessionManager.Create(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.UserResponse{
+		Errors: nil,
+		User:   &user,
+	}, nil
 }
 
 func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {

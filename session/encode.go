@@ -29,6 +29,7 @@ func encodeCookie(value string) (*http.Cookie, error) {
 		HttpOnly: true,
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
 	}
 
 	return &cookie, nil

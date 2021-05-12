@@ -27,3 +27,15 @@ func getGreaterThanMessage(field string, greaterThan string) string {
 func GetAlreadyExistsMessage(field string) string {
 	return fmt.Sprintf("An entry with that %s already exists!", field)
 }
+
+// GetDoesNotExistMessage returns a string that can be returned back to the user
+// as a feedback message to tell them that an entry with that value does not exist
+func GetDoesNotExistMessage(field string) string {
+	return fmt.Sprintf("An entry with that %s does not exist!", field)
+}
+
+// GetIncorrectMessage returns a string that can be returned back to the user
+// as a feedback message to tell them that the value they entered is incorrect
+func GetIncorrectMessage(field string) string {
+	return fmt.Sprintf("The %s you entered is incorrect!", field)
+}
