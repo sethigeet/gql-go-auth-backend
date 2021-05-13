@@ -44,7 +44,7 @@ func translate(err validator.FieldError) *model.FieldError {
 		message = getLessThanMessage(field, err.Param())
 	case "gt":
 		message = getGreaterThanMessage(field, err.Param())
-	case "uuid":
+	case "uuid4":
 		message = getInvalidUUIDMessage(field)
 	default:
 		panic("This type of validation error is not implemented yet!")

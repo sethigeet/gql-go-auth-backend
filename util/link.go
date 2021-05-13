@@ -16,6 +16,10 @@ const ExpirationDuration = 24 * time.Hour
 // so that it will be easily identifiable and it will not collide with any other key
 const ConfirmEmailPrefix = "confirm-email:"
 
+// ForgotPasswordPrefix is the string that is prefixed before the actual forgot password token while storing in redis
+// so that it will be easily identifiable and it will not collide with any other key
+const ForgotPasswordPrefix = "forgot-password:"
+
 var ctx = context.Background()
 
 // getLink create a link that can be put in an email and sent to the
@@ -42,21 +46,24 @@ func getLink(rdb *redis.Client, userID string, prefix string, endpoint string) (
 
 // GetUserIDFromToken first decrypts the provided token with the secret key and
 // then looks up the user id of the key in redis and returns it
-func GetUserIDFromToken(rdb *redis.Client, token string, prefix string) (string, error) {
+func GetUserIDFromToken(rdb *redis.Client, token string, prefix string) (string, func() error, error) {
 	decryptedToken, err := Decrypt(token)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	userID, err := rdb.Get(ctx, prefix+decryptedToken).Result()
 	switch {
 	case err == redis.Nil:
 		// Value does not exist
-		return "", nil
+		return "", nil, nil
 	case err != nil:
 		// Unable to get the value from redis
-		return "", err
+		return "", nil, err
 	}
 
-	return userID, nil
+	return userID, func() error {
+		err := rdb.Del(ctx, prefix+decryptedToken).Err()
+		return err
+	}, nil
 }

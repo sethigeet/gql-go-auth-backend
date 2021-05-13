@@ -18,7 +18,7 @@ import (
 )
 
 func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*model.UserResponse, error) {
-	userID, err := util.GetUserIDFromToken(r.RDB, token, util.ConfirmEmailPrefix)
+	userID, deleteToken, err := util.GetUserIDFromToken(r.RDB, token, util.ConfirmEmailPrefix)
 	if err != nil || userID == "" {
 		return &model.UserResponse{
 			Errors: []*model.FieldError{
@@ -54,6 +54,8 @@ func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*mod
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
+	deleteToken()
 
 	return &model.UserResponse{
 		Errors: nil,
@@ -197,11 +199,108 @@ func (r *mutationResolver) Register(ctx context.Context, credentials model.Regis
 }
 
 func (r *mutationResolver) ForgotPassword(ctx context.Context, credentials model.ForgotPasswordInput) (*model.ResetPasswordResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	success := false
+	if validationErrors := validator.Validate(credentials); validationErrors != nil {
+		return &model.ResetPasswordResponse{
+			Successful: &success,
+			Errors:     validationErrors,
+		}, nil
+	}
+
+	var user model.User
+	var result *gorm.DB
+	if strings.ContainsRune(credentials.UsernameOrEmail, '@') {
+		result = r.DB.First(&user, "email = ?", credentials.UsernameOrEmail)
+	} else {
+		result = r.DB.First(&user, "username = ?", credentials.UsernameOrEmail)
+	}
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return &model.ResetPasswordResponse{
+				Errors: []*model.FieldError{
+					{
+						Field:   "usernameOrEmail",
+						Message: validator.GetDoesNotExistMessage("username/email"),
+					},
+				},
+				Successful: &success,
+			}, nil
+		}
+
+		return nil, result.Error
+	}
+
+	err := util.SendEmail(r.RDB, user.ID, user.Email, util.ForgotPasswordPrefix, "/forgot-password")
+	if err != nil {
+		return nil, err
+	}
+
+	success = true
+	return &model.ResetPasswordResponse{
+		Errors:     nil,
+		Successful: &success,
+	}, nil
 }
 
 func (r *mutationResolver) ChangePassword(ctx context.Context, credentials model.ChangePasswordInput) (*model.ResetPasswordResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	success := false
+	if validationErrors := validator.Validate(credentials); validationErrors != nil {
+		return &model.ResetPasswordResponse{
+			Successful: &success,
+			Errors:     validationErrors,
+		}, nil
+	}
+
+	userID, deleteToken, err := util.GetUserIDFromToken(r.RDB, credentials.Token, util.ForgotPasswordPrefix)
+	if err != nil || userID == "" {
+		return &model.ResetPasswordResponse{
+			Successful: &success,
+			Errors: []*model.FieldError{
+				{
+					Field:   "token",
+					Message: validator.GetInvalidTokenMessage("token"),
+				},
+			},
+		}, nil
+	}
+
+	var user model.User
+	result := r.DB.First(&user, "id = ?", userID)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return &model.ResetPasswordResponse{
+				Successful: &success,
+				Errors: []*model.FieldError{
+					{
+						Field:   "token",
+						Message: validator.GetInvalidTokenMessage("token"),
+					},
+				},
+			}, nil
+		}
+
+		return nil, result.Error
+	}
+
+	hashedPasswd, err := util.HashPassword(credentials.NewPassword)
+	if err != nil {
+		return nil, err
+	}
+
+	result = r.DB.Model(&user).Update("password", hashedPasswd)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	deleteToken()
+
+	success = true
+	return &model.ResetPasswordResponse{
+		Errors:     nil,
+		Successful: &success,
+	}, nil
 }
 
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {

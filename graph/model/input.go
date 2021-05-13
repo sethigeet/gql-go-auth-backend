@@ -20,6 +20,6 @@ type ForgotPasswordInput struct {
 
 // ChangePasswordInput is the structure input that is received by the change password resolver
 type ChangePasswordInput struct {
-	Token       string `json:"token" validate:"required,uuid4"`
+	Token       string `json:"token" validate:"required"`
 	NewPassword string `json:"newPassword" validate:"required,gt=4"`
 }
