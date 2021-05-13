@@ -18,6 +18,9 @@ const ConfirmEmailPrefix = "confirm-email:"
 
 var ctx = context.Background()
 
+// getConfirmEmailLink create a link that can be put in an email and sent to the
+// user through which the user can verify their email
+// It creates an entry for the user id in redis and returns the encrypted key in a url back
 func getConfirmEmailLink(rdb *redis.Client, userID string) (string, error) {
 	token := uuid.New().String()
 
@@ -37,6 +40,8 @@ func getConfirmEmailLink(rdb *redis.Client, userID string) (string, error) {
 	return link, nil
 }
 
+// GetUserIDFromEmailToken first decrypts the provided token with the secret key and
+// then looks up the user id of the key in redis and returns it
 func GetUserIDFromEmailToken(rdb *redis.Client, token string) (string, error) {
 	decryptedToken, err := Decrypt(token)
 	if err != nil {

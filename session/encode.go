@@ -7,6 +7,9 @@ import (
 	"github.com/gorilla/securecookie"
 )
 
+// encodeCookie encodes the value of the given cookie using the secret hash and block key
+// so that other people cannot tell what it is and also helps us verify that the cookie value
+// was the one that was set by us and not set by someone else
 func encodeCookie(s *securecookie.SecureCookie, value string) (*http.Cookie, error) {
 	var secure bool
 	if os.Getenv("GO_ENV") == "production" {
@@ -33,6 +36,8 @@ func encodeCookie(s *securecookie.SecureCookie, value string) (*http.Cookie, err
 	return &cookie, nil
 }
 
+// decodeCookie decodes the value stored in the cookie using the secret
+// hash and block keys
 func decodeCookie(s *securecookie.SecureCookie, cookie *http.Cookie) (string, error) {
 	var value string
 

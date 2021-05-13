@@ -9,6 +9,8 @@ import (
 	"github.com/sethigeet/gql-go-auth-backend/graph/model"
 )
 
+// Validate takes a struct as an argument and runs some validation checks on it
+// that are specified on that struct in the tags
 func Validate(toValidate interface{}) []*model.FieldError {
 	validate := validator.New()
 	err := validate.Struct(toValidate)
@@ -24,6 +26,8 @@ func Validate(toValidate interface{}) []*model.FieldError {
 	return nil
 }
 
+// translate translates the errors to messages that make sense for
+// a normal human being
 func translate(err validator.FieldError) *model.FieldError {
 	field := err.Field()
 	errTag := err.Tag()

@@ -39,6 +39,8 @@ func LoadEnv(verify bool) error {
 	return nil
 }
 
+// verifyEnv verifies that all the environment variables specified .env.example file
+// are actually present in the environent and returns an error otherwise
 func verifyEnv(filename string) error {
 	var exampleEnv, actualEnv map[string]string
 	var err error

@@ -21,6 +21,8 @@ type User struct {
 	ForgotPasswordLocked bool      `json:"forgotPasswordLocked" gorm:"type:bool;not null;default:false"`
 }
 
+// BeforeCreate is run just before inserting a new user in the users table
+// It create a unique id for the user and hashes the password of the user
 func (user *User) BeforeCreate(tx *gorm.DB) error {
 	user.ID = uuid.New().String()
 
