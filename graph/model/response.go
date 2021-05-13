@@ -12,6 +12,12 @@ type ResetPasswordResponse struct {
 	Successful *bool         `json:"successful"`
 }
 
+// ConfirmEmailResponse is the structure of the response returned by the confirm email resolver
+type ConfirmEmailResponse struct {
+	Errors     []*FieldError `json:"errors"`
+	Successful *bool         `json:"successful"`
+}
+
 // UserResponse is the structure of the response returned by many resolvers related to the user entity
 type UserResponse struct {
 	Errors []*FieldError `json:"errors"`

@@ -9,25 +9,25 @@ import (
 	"fmt"
 	"strings"
 
-	"gorm.io/gorm"
-
 	"github.com/sethigeet/gql-go-auth-backend/graph/generated"
 	"github.com/sethigeet/gql-go-auth-backend/graph/model"
 	"github.com/sethigeet/gql-go-auth-backend/util"
 	"github.com/sethigeet/gql-go-auth-backend/validator"
+	"gorm.io/gorm"
 )
 
-func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*model.UserResponse, error) {
+func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*model.ConfirmEmailResponse, error) {
+	success := false
 	userID, deleteToken, err := util.GetUserIDFromToken(r.RDB, token, util.ConfirmEmailPrefix)
 	if err != nil || userID == "" {
-		return &model.UserResponse{
+		return &model.ConfirmEmailResponse{
 			Errors: []*model.FieldError{
 				{
 					Field:   "token",
 					Message: validator.GetInvalidTokenMessage("token"),
 				},
 			},
-			User: nil,
+			Successful: &success,
 		}, nil
 	}
 
@@ -36,14 +36,14 @@ func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*mod
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return &model.UserResponse{
+			return &model.ConfirmEmailResponse{
 				Errors: []*model.FieldError{
 					{
 						Field:   "token",
 						Message: validator.GetInvalidTokenMessage("token"),
 					},
 				},
-				User: nil,
+				Successful: &success,
 			}, nil
 		}
 
@@ -57,9 +57,10 @@ func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*mod
 
 	deleteToken()
 
-	return &model.UserResponse{
-		Errors: nil,
-		User:   &user,
+	success = true
+	return &model.ConfirmEmailResponse{
+		Errors:     nil,
+		Successful: &success,
 	}, nil
 }
 

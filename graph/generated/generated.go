@@ -44,6 +44,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	ConfirmEmailResponse struct {
+		Errors     func(childComplexity int) int
+		Successful func(childComplexity int) int
+	}
+
 	FieldError struct {
 		Field   func(childComplexity int) int
 		Message func(childComplexity int) int
@@ -82,7 +87,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	ConfirmEmail(ctx context.Context, token string) (*model.UserResponse, error)
+	ConfirmEmail(ctx context.Context, token string) (*model.ConfirmEmailResponse, error)
 	Login(ctx context.Context, credentials model.LoginInput) (*model.UserResponse, error)
 	Logout(ctx context.Context) (bool, error)
 	Register(ctx context.Context, credentials model.RegisterInput) (*model.UserResponse, error)
@@ -111,6 +116,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "ConfirmEmailResponse.errors":
+		if e.complexity.ConfirmEmailResponse.Errors == nil {
+			break
+		}
+
+		return e.complexity.ConfirmEmailResponse.Errors(childComplexity), true
+
+	case "ConfirmEmailResponse.successful":
+		if e.complexity.ConfirmEmailResponse.Successful == nil {
+			break
+		}
+
+		return e.complexity.ConfirmEmailResponse.Successful(childComplexity), true
 
 	case "FieldError.field":
 		if e.complexity.FieldError.Field == nil {
@@ -354,6 +373,11 @@ type ResetPasswordResponse {
   successful: Boolean
 }
 
+type ConfirmEmailResponse {
+  errors: [FieldError!]
+  successful: Boolean
+}
+
 ########
 # Inputs
 ########
@@ -381,7 +405,7 @@ input ChangePasswordInput {
 # Add to global types
 #####################
 type Mutation {
-  confirmEmail(token: String!): UserResponse!
+  confirmEmail(token: String!): ConfirmEmailResponse!
   login(credentials: LoginInput!): UserResponse!
   logout: Boolean!
   register(credentials: RegisterInput!): UserResponse!
@@ -528,6 +552,70 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _ConfirmEmailResponse_errors(ctx context.Context, field graphql.CollectedField, obj *model.ConfirmEmailResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ConfirmEmailResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Errors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.FieldError)
+	fc.Result = res
+	return ec.marshalOFieldError2ᚕᚖgithubᚗcomᚋsethigeetᚋgqlᚑgoᚑauthᚑbackendᚋgraphᚋmodelᚐFieldErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ConfirmEmailResponse_successful(ctx context.Context, field graphql.CollectedField, obj *model.ConfirmEmailResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ConfirmEmailResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Successful, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _FieldError_field(ctx context.Context, field graphql.CollectedField, obj *model.FieldError) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -635,9 +723,9 @@ func (ec *executionContext) _Mutation_confirmEmail(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.UserResponse)
+	res := resTmp.(*model.ConfirmEmailResponse)
 	fc.Result = res
-	return ec.marshalNUserResponse2ᚖgithubᚗcomᚋsethigeetᚋgqlᚑgoᚑauthᚑbackendᚋgraphᚋmodelᚐUserResponse(ctx, field.Selections, res)
+	return ec.marshalNConfirmEmailResponse2ᚖgithubᚗcomᚋsethigeetᚋgqlᚑgoᚑauthᚑbackendᚋgraphᚋmodelᚐConfirmEmailResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2456,6 +2544,32 @@ func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj
 
 // region    **************************** object.gotpl ****************************
 
+var confirmEmailResponseImplementors = []string{"ConfirmEmailResponse"}
+
+func (ec *executionContext) _ConfirmEmailResponse(ctx context.Context, sel ast.SelectionSet, obj *model.ConfirmEmailResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, confirmEmailResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ConfirmEmailResponse")
+		case "errors":
+			out.Values[i] = ec._ConfirmEmailResponse_errors(ctx, field, obj)
+		case "successful":
+			out.Values[i] = ec._ConfirmEmailResponse_successful(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var fieldErrorImplementors = []string{"FieldError"}
 
 func (ec *executionContext) _FieldError(ctx context.Context, sel ast.SelectionSet, obj *model.FieldError) graphql.Marshaler {
@@ -2965,6 +3079,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 func (ec *executionContext) unmarshalNChangePasswordInput2githubᚗcomᚋsethigeetᚋgqlᚑgoᚑauthᚑbackendᚋgraphᚋmodelᚐChangePasswordInput(ctx context.Context, v interface{}) (model.ChangePasswordInput, error) {
 	res, err := ec.unmarshalInputChangePasswordInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNConfirmEmailResponse2githubᚗcomᚋsethigeetᚋgqlᚑgoᚑauthᚑbackendᚋgraphᚋmodelᚐConfirmEmailResponse(ctx context.Context, sel ast.SelectionSet, v model.ConfirmEmailResponse) graphql.Marshaler {
+	return ec._ConfirmEmailResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNConfirmEmailResponse2ᚖgithubᚗcomᚋsethigeetᚋgqlᚑgoᚑauthᚑbackendᚋgraphᚋmodelᚐConfirmEmailResponse(ctx context.Context, sel ast.SelectionSet, v *model.ConfirmEmailResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ConfirmEmailResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNFieldError2ᚖgithubᚗcomᚋsethigeetᚋgqlᚑgoᚑauthᚑbackendᚋgraphᚋmodelᚐFieldError(ctx context.Context, sel ast.SelectionSet, v *model.FieldError) graphql.Marshaler {

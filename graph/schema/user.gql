@@ -19,6 +19,11 @@ type ResetPasswordResponse {
   successful: Boolean
 }
 
+type ConfirmEmailResponse {
+  errors: [FieldError!]
+  successful: Boolean
+}
+
 ########
 # Inputs
 ########
@@ -46,7 +51,7 @@ input ChangePasswordInput {
 # Add to global types
 #####################
 type Mutation {
-  confirmEmail(token: String!): UserResponse!
+  confirmEmail(token: String!): ConfirmEmailResponse!
   login(credentials: LoginInput!): UserResponse!
   logout: Boolean!
   register(credentials: RegisterInput!): UserResponse!
