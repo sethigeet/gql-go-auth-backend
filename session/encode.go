@@ -7,9 +7,7 @@ import (
 	"github.com/gorilla/securecookie"
 )
 
-func encodeCookie(value string) (*http.Cookie, error) {
-	var s = securecookie.New([]byte(os.Getenv("SESSION_SECRET_HASH")), []byte(os.Getenv("SESSION_SECRET_BLOCK")))
-
+func encodeCookie(s *securecookie.SecureCookie, value string) (*http.Cookie, error) {
 	var secure bool
 	if os.Getenv("GO_ENV") == "production" {
 		secure = true
@@ -35,8 +33,7 @@ func encodeCookie(value string) (*http.Cookie, error) {
 	return &cookie, nil
 }
 
-func decodeCookie(cookie *http.Cookie) (string, error) {
-	var s = securecookie.New([]byte(os.Getenv("SESSION_SECRET_HASH")), []byte(os.Getenv("SESSION_SECRET_BLOCK")))
+func decodeCookie(s *securecookie.SecureCookie, cookie *http.Cookie) (string, error) {
 	var value string
 
 	err := s.Decode(CookieName, cookie.Value, &value)

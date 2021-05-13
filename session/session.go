@@ -10,12 +10,14 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"github.com/gorilla/securecookie"
 )
 
 type SessionManager struct {
-	RDB     *redis.Client
-	Writer  http.ResponseWriter
-	Request *http.Request
+	RDB           *redis.Client
+	Writer        http.ResponseWriter
+	Request       *http.Request
+	CookieSecurer *securecookie.SecureCookie
 }
 
 // CookieName is the name of the cookie that is stored in the browser
@@ -44,7 +46,7 @@ func (manager SessionManager) Create(userID string) error {
 	}
 
 	// Encode the cookie for safety
-	cookie, err := encodeCookie(sessionID)
+	cookie, err := encodeCookie(manager.CookieSecurer, sessionID)
 	if err != nil {
 		// Delete the session ID from redis as the cookie could not be encoded and hence is not used
 		manager.RDB.Del(ctx, SessionIDPrefix+sessionID)
@@ -65,7 +67,7 @@ func (manager SessionManager) Retrieve(onlySessionID bool) (string, error) {
 		return "", err
 	}
 
-	sessionID, err := decodeCookie(cookie)
+	sessionID, err := decodeCookie(manager.CookieSecurer, cookie)
 	if err != nil {
 		return "", err
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-redis/redis/v8"
+	"github.com/gorilla/securecookie"
 	"gorm.io/gorm"
 
 	"github.com/sethigeet/gql-go-auth-backend/database"
@@ -58,6 +59,10 @@ func getServer(db *gorm.DB, rdb *redis.Client) func(w http.ResponseWriter, r *ht
 				RDB:     rdb,
 				Writer:  w,
 				Request: r,
+				CookieSecurer: securecookie.New(
+					[]byte(os.Getenv("SESSION_SECRET_HASH")),
+					[]byte(os.Getenv("SESSION_SECRET_BLOCK")),
+				),
 			},
 		}
 		server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers}))
