@@ -18,7 +18,47 @@ import (
 )
 
 func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*model.UserResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	userID, err := util.GetUserIDFromEmailToken(r.RDB, token)
+	if err != nil || userID == "" {
+		return &model.UserResponse{
+			Errors: []*model.FieldError{
+				{
+					Field:   "token",
+					Message: validator.GetInvalidTokenMessage("token"),
+				},
+			},
+			User: nil,
+		}, nil
+	}
+
+	var user model.User
+	result := r.DB.First(&user, "id = ?", userID)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return &model.UserResponse{
+				Errors: []*model.FieldError{
+					{
+						Field:   "token",
+						Message: validator.GetInvalidTokenMessage("token"),
+					},
+				},
+				User: nil,
+			}, nil
+		}
+
+		return nil, result.Error
+	}
+
+	result = r.DB.Model(&user).Update("confirmed", true)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &model.UserResponse{
+		Errors: nil,
+		User:   &user,
+	}, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, credentials model.LoginInput) (*model.UserResponse, error) {
@@ -37,16 +77,20 @@ func (r *mutationResolver) Login(ctx context.Context, credentials model.LoginInp
 		result = r.DB.First(&user, "username = ?", credentials.UsernameOrEmail)
 	}
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return &model.UserResponse{
-			Errors: []*model.FieldError{
-				{
-					Field:   "usernameOrEmail",
-					Message: validator.GetDoesNotExistMessage("username/email"),
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return &model.UserResponse{
+				Errors: []*model.FieldError{
+					{
+						Field:   "usernameOrEmail",
+						Message: validator.GetDoesNotExistMessage("username/email"),
+					},
 				},
-			},
-			User: nil,
-		}, nil
+				User: nil,
+			}, nil
+		}
+
+		return nil, result.Error
 	}
 
 	verified := util.ComparePasswords(user.Password, credentials.Password)
@@ -127,6 +171,11 @@ func (r *mutationResolver) Register(ctx context.Context, credentials model.Regis
 			}, nil
 		}
 		return nil, result.Error
+	}
+
+	err := util.SendConfirmEmailEmail(r.RDB, user.ID, user.Email)
+	if err != nil {
+		return nil, err
 	}
 
 	return &model.UserResponse{

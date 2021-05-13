@@ -33,13 +33,15 @@ func translate(err validator.FieldError) *model.FieldError {
 	case "required":
 		message = getRequiredMessage(field)
 	case "email":
-		message = getEmailMessage(field)
+		message = getInvalidEmailMessage(field)
 	case "excludesrune":
 		message = getExcludesMessage(field, err.Param())
 	case "lt":
 		message = getLessThanMessage(field, err.Param())
 	case "gt":
 		message = getGreaterThanMessage(field, err.Param())
+	case "uuid":
+		message = getInvalidUUIDMessage(field)
 	default:
 		panic("This type of validation error is not implemented yet!")
 	}

@@ -55,6 +55,7 @@ func getServer(db *gorm.DB, rdb *redis.Client) func(w http.ResponseWriter, r *ht
 			DB:      db,
 			Writer:  w,
 			Request: r,
+			RDB:     rdb,
 			SessionManager: session.SessionManager{
 				RDB:     rdb,
 				Writer:  w,

@@ -6,7 +6,7 @@ func getRequiredMessage(field string) string {
 	return fmt.Sprintf("%s is required!", field)
 }
 
-func getEmailMessage(field string) string {
+func getInvalidEmailMessage(field string) string {
 	return fmt.Sprintf("%s must be a valid email address!", field)
 }
 
@@ -38,4 +38,14 @@ func GetDoesNotExistMessage(field string) string {
 // as a feedback message to tell them that the value they entered is incorrect
 func GetIncorrectMessage(field string) string {
 	return fmt.Sprintf("The %s you entered is incorrect!", field)
+}
+
+func getInvalidUUIDMessage(field string) string {
+	return fmt.Sprintf("The %s you entered is not a valid uuid!", field)
+}
+
+// GetInvalidTokenMessage returns a string that can be returned back to the user
+// as a feedback message to tell them that the value they entered is not a valid token
+func GetInvalidTokenMessage(field string) string {
+	return fmt.Sprintf("The %s is either invalid or has expired!", field)
 }
