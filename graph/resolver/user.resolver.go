@@ -93,6 +93,18 @@ func (r *mutationResolver) Login(ctx context.Context, credentials model.LoginInp
 		return nil, result.Error
 	}
 
+	if !user.Confirmed {
+		return &model.UserResponse{
+			Errors: []*model.FieldError{
+				{
+					Field:   "email",
+					Message: "Please confirm your email first!",
+				},
+			},
+			User: nil,
+		}, nil
+	}
+
 	verified := util.ComparePasswords(user.Password, credentials.Password)
 	if !verified {
 		return &model.UserResponse{
