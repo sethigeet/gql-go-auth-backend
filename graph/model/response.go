@@ -9,7 +9,7 @@ type FieldError struct {
 // ResetPasswordResponse is the structure of the response returned by the reset password resolver
 type ResetPasswordResponse struct {
 	Errors     []*FieldError `json:"errors"`
-	Successful *bool         `json:"successful"`
+	Successful bool          `json:"successful"`
 }
 
 // UserResponse is the structure of the response returned by many resolvers related to the user entity

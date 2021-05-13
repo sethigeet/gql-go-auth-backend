@@ -18,14 +18,14 @@ const ConfirmEmailPrefix = "confirm-email:"
 
 var ctx = context.Background()
 
-// getConfirmEmailLink create a link that can be put in an email and sent to the
+// getLink create a link that can be put in an email and sent to the
 // user through which the user can verify their email
 // It creates an entry for the user id in redis and returns the encrypted key in a url back
-func getConfirmEmailLink(rdb *redis.Client, userID string) (string, error) {
+func getLink(rdb *redis.Client, userID string, prefix string, endpoint string) (string, error) {
 	token := uuid.New().String()
 
 	var err error
-	err = rdb.Set(ctx, ConfirmEmailPrefix+token, userID, ExpirationDuration).Err()
+	err = rdb.Set(ctx, prefix+token, userID, ExpirationDuration).Err()
 	if err != nil {
 		return "", err
 	}
@@ -35,20 +35,20 @@ func getConfirmEmailLink(rdb *redis.Client, userID string) (string, error) {
 		return "", err
 	}
 
-	link := os.Getenv("FRONTEND_HOST") + "/confirm-email/" + encryptedToken
+	link := os.Getenv("FRONTEND_HOST") + endpoint + "/" + encryptedToken
 
 	return link, nil
 }
 
-// GetUserIDFromEmailToken first decrypts the provided token with the secret key and
+// GetUserIDFromToken first decrypts the provided token with the secret key and
 // then looks up the user id of the key in redis and returns it
-func GetUserIDFromEmailToken(rdb *redis.Client, token string) (string, error) {
+func GetUserIDFromToken(rdb *redis.Client, token string, prefix string) (string, error) {
 	decryptedToken, err := Decrypt(token)
 	if err != nil {
 		return "", err
 	}
 
-	userID, err := rdb.Get(ctx, ConfirmEmailPrefix+decryptedToken).Result()
+	userID, err := rdb.Get(ctx, prefix+decryptedToken).Result()
 	switch {
 	case err == redis.Nil:
 		// Value does not exist

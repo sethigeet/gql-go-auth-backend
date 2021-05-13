@@ -6,11 +6,11 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// SendConfirmEmailEmail creates a unique token for a given userID, stores that
+// SendEmail creates a unique token for a given userID, stores that
 // token in redis and sends an email to the email address of that user to ask
-// them to visit that link and confirm their email
-func SendConfirmEmailEmail(rdb *redis.Client, userID, email string) error {
-	link, err := getConfirmEmailLink(rdb, userID)
+// them to visit that link and do what is required
+func SendEmail(rdb *redis.Client, userID, email, prefix, endpoint string) error {
+	link, err := getLink(rdb, userID, prefix, endpoint)
 	if err != nil {
 		return err
 	}

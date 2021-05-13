@@ -18,7 +18,7 @@ import (
 )
 
 func (r *mutationResolver) ConfirmEmail(ctx context.Context, token string) (*model.UserResponse, error) {
-	userID, err := util.GetUserIDFromEmailToken(r.RDB, token)
+	userID, err := util.GetUserIDFromToken(r.RDB, token, util.ConfirmEmailPrefix)
 	if err != nil || userID == "" {
 		return &model.UserResponse{
 			Errors: []*model.FieldError{
@@ -185,7 +185,7 @@ func (r *mutationResolver) Register(ctx context.Context, credentials model.Regis
 		return nil, result.Error
 	}
 
-	err := util.SendConfirmEmailEmail(r.RDB, user.ID, user.Email)
+	err := util.SendEmail(r.RDB, user.ID, user.Email, util.ConfirmEmailPrefix, "/confirm-email")
 	if err != nil {
 		return nil, err
 	}
