@@ -205,7 +205,23 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, credentials model
 }
 
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	userID, err := r.SessionManager.Retrieve(false)
+	if err != nil {
+		return nil, err
+	}
+
+	var user model.User
+	result := r.DB.First(&user, "id = ?", userID)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("not authenticated")
+		}
+
+		return nil, result.Error
+	}
+
+	return &user, nil
 }
 
 func (r *userResolver) CreatedAt(ctx context.Context, obj *model.User) (int, error) {
